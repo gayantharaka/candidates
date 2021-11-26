@@ -17,10 +17,11 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
+/*Presenter class*/
 public class Presenter {
 
     @NonNull
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();//to be disposed on OnDestroy
     private ClientRx clientRx;
 
     private Context context;
