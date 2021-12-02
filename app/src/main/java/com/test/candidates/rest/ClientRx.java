@@ -8,7 +8,7 @@ import retrofit2.http.Query;
 
 public interface ClientRx {
 
-    @GET("api/?")
+    @GET("api/")
     Single<CandidateResponse> getCandidateData(@Query("results") String resultsAmount);
 
 }

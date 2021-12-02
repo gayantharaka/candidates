@@ -9,4 +9,6 @@
 
     <string name="actionselect">Select</string>
     <string name="actionselected">Selected</string>
+    <string name="confirmmsg">Are you sure you want to deselect this candidate?</string>
+    <string name="confirmdialogheader">Confirm</string>
 </resources>

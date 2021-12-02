@@ -18,25 +18,22 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.test.candidates.R;
-import com.test.candidates.adapters.DataAdapter;
-import com.test.candidates.model.Model;
+import com.test.candidates.adapters.DataCandidateListAdapter;
 import com.test.candidates.presenter.Presenter;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link HomeFragment#newInstance} factory method to
+ * Use the {@link CandidateFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment implements Presenter.View{
+public class CandidateFragment extends Fragment{
 
     View view;
     RecyclerView recyclerView;
     Presenter presenter;
-    DataAdapter dataAdapter;
+    DataCandidateListAdapter dataAdapter;
 
     private CallBackListener callBackListener;
 
@@ -49,7 +46,7 @@ public class HomeFragment extends Fragment implements Presenter.View{
     private String mParam1;
     private String mParam2;
 
-    public HomeFragment() {
+    public CandidateFragment() {
         // Required empty public constructor
     }
 
@@ -59,11 +56,11 @@ public class HomeFragment extends Fragment implements Presenter.View{
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeFragment.
+     * @return A new instance of fragment CandidateFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static HomeFragment newInstance(String param1, String param2) {
-        HomeFragment fragment = new HomeFragment();
+    public static CandidateFragment newInstance(String param1, String param2) {
+        CandidateFragment fragment = new CandidateFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -78,13 +75,17 @@ public class HomeFragment extends Fragment implements Presenter.View{
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        setRetainInstance(true);
+
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if (getActivity() instanceof CallBackListener)
+        if (getActivity() instanceof CallBackListener) {
             callBackListener = (CallBackListener) getActivity();
+            callBackListener.fragmentLoaded();
+        }
     }
 
     @Override
@@ -92,7 +93,7 @@ public class HomeFragment extends Fragment implements Presenter.View{
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        initUI(view);
+        initUI();
         // Inflate the layout for this fragment
         return view;
     }
@@ -140,34 +141,36 @@ public class HomeFragment extends Fragment implements Presenter.View{
 
     }
 
-    private void initUI(View view) {
+    private void initUI() {
 
         recyclerView = view.findViewById(R.id.list_data);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-
-        presenter = new Presenter(this,getContext());
-        dataAdapter = new DataAdapter(presenter,getContext());
-        recyclerView.setAdapter(dataAdapter);
-
-        presenter.loadData();
-
-
     }
 
-    @Override
-    public void addData(List<Model> data) {
-        dataAdapter.submitList(data);
+    public void initiateAdaptors()
+    {
+        if (presenter!=null) {
+            dataAdapter = new DataCandidateListAdapter(presenter,getContext());
+            recyclerView.setAdapter(dataAdapter);
+        }
+    }
+
+    public void setPresenter(Presenter presenter)
+    {
+        this.presenter = presenter;
+    }
+
+    public void refreshAdaptor()
+    {
         dataAdapter.notifyDataSetChanged();
     }
-
     @Override
-    public void showDetails(Model model) {
-        callBackListener.onCallBack(model);
+    public void onResume() {
+        super.onResume();
     }
 
     public interface CallBackListener {
-        void onCallBack(Model model);
+        void fragmentLoaded();//to let mainactivity know that fragment has loaded
     }
 }

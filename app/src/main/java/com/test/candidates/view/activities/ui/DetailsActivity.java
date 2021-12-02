@@ -3,6 +3,8 @@ package com.test.candidates.view.activities.ui;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,7 +20,7 @@ import com.test.candidates.presenter.Presenter;
 
 import java.util.List;
 
-public class DetailsActivity extends AppCompatActivity{
+public class DetailsActivity extends AppCompatActivity{//activity that shows details of selected item
 
     ImageView imageView;
     TextView name,address,tel,dob,email;
@@ -41,7 +43,7 @@ public class DetailsActivity extends AppCompatActivity{
 
     private void initUI() {
 
-        model = (Model) getIntent().getSerializableExtra("selected_data");
+        model = (Model) getIntent().getSerializableExtra("send");//retrieve sent model object
 
         imageView = findViewById(R.id.imageView);
         name = findViewById(R.id.name);
@@ -61,10 +63,29 @@ public class DetailsActivity extends AppCompatActivity{
         tel.setText(model.getTelephone());
         dob.setText(model.getDob());
         email.setText(model.getEmailAddress());
+
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.select_btn);
+        if (model.isSelected())
+        {
+            item.setTitle("Selected");
+        }
+        else
+        {
+            item.setTitle("Select");
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("result", model);
+        setResult(Activity.RESULT_OK,returnIntent);
         finish();
         return true;
     }
@@ -80,7 +101,7 @@ public class DetailsActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         try {
-            if (item.getTitle()!=null &&  item.getTitle().equals("Select") || item.getTitle().equals("Selected"))
+            if (item.getTitle()!=null &&  (item.getTitle().toString().equalsIgnoreCase("Select") || item.getTitle().toString().equalsIgnoreCase("Selected")))
             {
                 if (model.isSelected())
                 {

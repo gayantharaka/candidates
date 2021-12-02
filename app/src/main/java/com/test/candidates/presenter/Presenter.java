@@ -26,23 +26,24 @@ public class Presenter {
 
     private Context context;
 
-    private View candidatesView,selectedView,detailsView;
+    private View candidatesView;
 
-    List<Model> data = new ArrayList<Model>();
+    List<Model> orginalData = new ArrayList<Model>();
+    List<Model> dataforsearch = new ArrayList<Model>();
 
-    List<Model> selecteddata = new ArrayList<Model>();
+
+    List<Model> selectedData = new ArrayList<Model>();
 
 
-    public Presenter(View candidatesView,Context context/*, View selectedView, View detailsView,Context context*/) {
+    public Presenter(View candidatesView,Context context) {
         this.candidatesView = candidatesView;
         this.context = context;
-       /* this.selectedView = selectedView;
-        this.detailsView = detailsView;*/
+
     }
 
     public void loadData()
     {
-       /* if (data.size()==0) {*/
+        if (orginalData.size()==0) {
             RestClient restClient = new RestClient("https://randomuser.me/");
             clientRx = restClient.getClientRx(context);
 
@@ -74,9 +75,10 @@ public class Presenter {
                                             addr,
                                             false);
 
-                                    data.add(model);
+                                    orginalData.add(model);
                                 }
-                                candidatesView.addData(data);
+                                dataforsearch.addAll(orginalData);
+                                candidatesView.updateCandidateList();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -88,21 +90,54 @@ public class Presenter {
                             Toast.makeText(context,"Error occurred. Please try again",Toast.LENGTH_SHORT).show();
                         }
                     }));
-      /*  } else {
-            candidatesView.addData(data);
-            Toast.makeText(context,"test1",Toast.LENGTH_SHORT).show();
-        }*/
+        } else {
+            candidatesView.updateCandidateList();
+    //        Toast.makeText(context,"test1",Toast.LENGTH_SHORT).show();
+        }
 
 
     }
 
-    public void filterData(String text)
+    public void loadSelectedData()//check selected candidates from original data and retrieve them to show in 2nd tab
+    {
+
+        selectedData = new ArrayList<>();
+
+        for(Model temp: orginalData)
+        {
+            if(temp.isSelected())
+            {
+                selectedData.add(temp);
+            }
+        }
+
+        candidatesView.updateSelectedList();
+    }
+
+    public void modifyOriginalData(int position)//update original orginalData retrieved from backend
+    {
+        Model model = selectedData.get(position);
+        model.setSelected(false);
+
+        for(int i = 0; i< orginalData.size(); i++)
+        {
+            if(orginalData.get(i).getEmailAddress().equalsIgnoreCase(model.getEmailAddress()))
+            {
+                orginalData.get(i).setSelected(false);
+            }
+        }
+
+        selectedData.remove(position);
+
+    }
+
+    public void filterData(String text)//perform search function
     {
         ArrayList<Model> filteredlist = new ArrayList<>();
 
         if (text.length()>3) {
             // running a for loop to compare elements.
-            for (Model item : data) {
+            for (Model item : orginalData) {
                 // checking if the entered string matched with any item of our recycler view.
                 if (item.getFirstName().toLowerCase().contains(text.toLowerCase())
                    || item.getLastName().toLowerCase().contains(text.toLowerCase()))
@@ -112,29 +147,49 @@ public class Presenter {
                     filteredlist.add(item);
                 }
             }
-            candidatesView.addData(filteredlist);
 
             if(!filteredlist.isEmpty())
             {
-                candidatesView.addData(filteredlist);
+                orginalData.clear();
+                orginalData.addAll(filteredlist);
+                candidatesView.updateCandidateList();
             }
 
         }
         else
         {
-            candidatesView.addData(data);
+            orginalData.clear();
+            orginalData.addAll(dataforsearch);
+            candidatesView.updateCandidateList();
         }
 
     }
 
-    public void onItemInteraction(int i)
+    public List<Model> getSelectedData() {
+        return selectedData;
+    }
+
+    public void setSelectedData(List<Model> selectedData) {
+        this.selectedData = selectedData;
+    }
+
+    public List<Model> getOrginalData() {
+        return orginalData;
+    }
+
+    public void setOrginalData(List<Model> orginalData) {
+        this.orginalData = orginalData;
+    }
+
+    public void onItemInteraction(int indexClicked)
     {
-        candidatesView.showDetails(data.get(i));
+        candidatesView.showDetails(indexClicked);
     }
 
     public interface View {
-        void addData(List<Model> data);
-        void showDetails(Model model);
+        void updateCandidateList(); //refresh candidate list
+        void updateSelectedList();//refresh selected list
+        void showDetails(int indexClicked);//show details in new screen
     }
 
 }
